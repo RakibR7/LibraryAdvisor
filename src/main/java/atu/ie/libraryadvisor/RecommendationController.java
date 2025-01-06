@@ -13,10 +13,10 @@ public class RecommendationController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<Recommendation> getRecommendations(@PathVariable Long userId) {
-        Recommendation recommendation = recommendationRepository.findByUserId(userId);
-        if (recommendation == null) {
-            return ResponseEntity.notFound().build();
+        Recommendation rec = recommendationRepository.findByUserId(userId);
+        if (rec == null) {
+            return ResponseEntity.ok(new Recommendation()); // or return an empty list
         }
-        return ResponseEntity.ok(recommendation);
+        return ResponseEntity.ok(rec);
     }
 }
