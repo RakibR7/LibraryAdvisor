@@ -22,4 +22,7 @@ public class Recommendation {
     public void setUserId(Long userId) { this.userId = userId; }
     public List<Long> getRecommendedBookIds() { return recommendedBookIds; }
     public void setRecommendedBookIds(List<Long> recommendedBookIds) { this.recommendedBookIds = recommendedBookIds; }
+
+    public void setId(long l) {
+    }
 }
