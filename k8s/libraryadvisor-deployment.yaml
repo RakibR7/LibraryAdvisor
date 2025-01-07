@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libraryadvisor-deployment
+  labels:
+    app: libraryadvisor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: libraryadvisor
+  template:
+    metadata:
+      labels:
+        app: libraryadvisor
+    spec:
+      containers:
+        - name: libraryadvisor
+          image: your-dockerhub-username/libraryadvisor:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/libraryadvisor_db
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: mysqlpassword
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
