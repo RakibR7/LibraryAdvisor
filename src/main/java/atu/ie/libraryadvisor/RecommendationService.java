@@ -16,7 +16,6 @@ public class RecommendationService {
     private BorrowHistoryRepository borrowHistoryRepository;
     @Autowired
     private RestTemplate restTemplate;
-
     @RabbitListener(queues = RabbitMQConfig.BORROW_BOOK_QUEUE)
     public void handleBorrowMessage(String msg) {
         Long userId = parseUser(msg);
@@ -25,7 +24,6 @@ public class RecommendationService {
         borrowHistoryRepository.save(new BorrowHistory(userId, bookId, LocalDateTime.now()));
         updateRecommendations(userId);
     }
-
     @RabbitListener(queues = RabbitMQConfig.RETURN_BOOK_QUEUE)
     public void handleReturnMessage(String msg) {
         Long userId = parseUser(msg);
@@ -40,7 +38,6 @@ public class RecommendationService {
         }
         updateRecommendations(userId);
     }
-
     private void updateRecommendations(Long userId) {
         List<BorrowHistory> all = borrowHistoryRepository.findByUserId(userId);
         if (all.isEmpty()) {
@@ -61,14 +58,16 @@ public class RecommendationService {
             clearRec(userId);
             return;
         }
-        List<Long> matches = Arrays.stream(allBooks).filter(b -> {
-            String g = b.getGenre() == null ? "" : b.getGenre().toLowerCase();
-            String a = b.getAuthor() == null ? "" : b.getAuthor().toLowerCase();
-            return userGenres.contains(g) || userAuthors.contains(a);
-        }).map(BookDto::getId).collect(Collectors.toList());
+        List<Long> matches = Arrays.stream(allBooks)
+                .filter(b -> {
+                    String g = b.getGenre() == null ? "" : b.getGenre().toLowerCase();
+                    String a = b.getAuthor() == null ? "" : b.getAuthor().toLowerCase();
+                    return userGenres.contains(g) || userAuthors.contains(a);
+                })
+                .map(BookDto::getId)
+                .collect(Collectors.toList());
         saveRec(userId, matches);
     }
-
     private BookDto getBook(Long bookId) {
         try {
             return restTemplate.getForObject("http://libraryhub:8081/api/books/" + bookId, BookDto.class);
@@ -76,7 +75,6 @@ public class RecommendationService {
             return null;
         }
     }
-
     private void clearRec(Long userId) {
         Recommendation r = recommendationRepository.findByUserId(userId);
         if (r != null) {
@@ -84,16 +82,12 @@ public class RecommendationService {
             recommendationRepository.save(r);
         }
     }
-
     private void saveRec(Long userId, List<Long> ids) {
         Recommendation r = recommendationRepository.findByUserId(userId);
         if (r == null) r = new Recommendation(userId, ids);
-        else {
-            r.setRecommendedBookIds(ids);
-        }
+        else r.setRecommendedBookIds(ids);
         recommendationRepository.save(r);
     }
-
     private Long parseUser(String msg) {
         try {
             int i = msg.indexOf("User ");
@@ -105,7 +99,6 @@ public class RecommendationService {
             return null;
         }
     }
-
     private Long parseBook(String msg) {
         try {
             int i = msg.indexOf("Book ");
